@@ -2,8 +2,8 @@
 
 namespace RFM\Event\Api;
 
-use Symfony\Component\EventDispatcher\Event;
 use RFM\Repository\ItemData;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * API event. Dispatched each time a folder contents is read.
