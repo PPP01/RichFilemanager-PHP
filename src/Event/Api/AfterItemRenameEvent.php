@@ -2,7 +2,7 @@
 
 namespace RFM\Event\Api;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use RFM\Repository\ItemData;
 
 /**
