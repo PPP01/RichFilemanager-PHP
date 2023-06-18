@@ -50,21 +50,10 @@ class UploadHandler extends BaseUploadHandler
         //$this->options['image_library'] = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 0 : 1;
 
         // original image settings
-        $this->options['image_versions'] = array(
-            '' => array(
-                'auto_orient' => $this->storage->config('images.main.autoOrient'),
-                'max_width' => $this->storage->config('images.main.maxWidth'),
-                'max_height' => $this->storage->config('images.main.maxHeight'),
-            ),
-        );
+        $this->options['image_versions'] = ['' => ['auto_orient' => $this->storage->config('images.main.autoOrient'), 'max_width' => $this->storage->config('images.main.maxWidth'), 'max_height' => $this->storage->config('images.main.maxHeight')]];
         // image thumbnail settings
         if($this->storage->config('images.thumbnail.enabled') === true) {
-            $this->options['image_versions']['thumbnail'] = array(
-                'upload_dir' => $this->model->thumbnail()->getAbsolutePath(),
-                'crop' => $this->storage->config('images.thumbnail.crop'),
-                'max_width' => $this->storage->config('images.thumbnail.maxWidth'),
-                'max_height' => $this->storage->config('images.thumbnail.maxHeight'),
-            );
+            $this->options['image_versions']['thumbnail'] = ['upload_dir' => $this->model->thumbnail()->getAbsolutePath(), 'crop' => $this->storage->config('images.thumbnail.crop'), 'max_width' => $this->storage->config('images.thumbnail.maxWidth'), 'max_height' => $this->storage->config('images.thumbnail.maxHeight')];
         }
 
         $this->error_messages['accept_file_types'] = 'INVALID_FILE_TYPE';
@@ -92,7 +81,7 @@ class UploadHandler extends BaseUploadHandler
 
     protected function trim_file_name($file_path, $name, $size, $type, $error, $index, $content_range)
     {
-        return $this->storage->normalizeString($name, array('.', '-'));
+        return $this->storage->normalizeString($name, ['.', '-']);
     }
 
     protected function get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range)
@@ -103,7 +92,7 @@ class UploadHandler extends BaseUploadHandler
         return parent::get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range);
     }
 
-    protected function validate($uploaded_file, $file, $error, $index)
+    protected function validate($uploaded_file, $file, $error, $index): bool
     {
         if ($error) {
             $file->error = $this->get_error_message($error);
@@ -126,11 +115,7 @@ class UploadHandler extends BaseUploadHandler
             $file->error = ['FORBIDDEN_NAME', [$model->getRelativePath()]];
             return false;
         }
-        if ($uploaded_file && is_uploaded_file($uploaded_file)) {
-            $file_size = $this->get_file_size($uploaded_file);
-        } else {
-            $file_size = $content_length;
-        }
+        $file_size = $uploaded_file && is_uploaded_file($uploaded_file) ? $this->get_file_size($uploaded_file) : $content_length;
         if ($this->storage->config('options.fileRootSizeLimit') > 0 &&
             ($file_size + $this->storage->getRootTotalSize()) > $this->storage->config('options.fileRootSizeLimit')) {
             $file->error = $this->get_error_message('max_storage_size');
@@ -160,7 +145,7 @@ class UploadHandler extends BaseUploadHandler
         $min_width = @$this->options['min_width'];
         $min_height = @$this->options['min_height'];
         if (($max_width || $max_height || $min_width || $min_height) && $this->is_valid_image_name($file->name)) {
-            list($img_width, $img_height) = $this->get_image_size($uploaded_file);
+            [$img_width, $img_height] = $this->get_image_size($uploaded_file);
 
             // If we are auto rotating the image by default, do the checks on
             // the correct orientation

@@ -48,14 +48,6 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
     protected $isDir;
 
     /**
-     * Define whether item is thumbnail file or thumbnails folder.
-     * Set up in constructor upon initialization and can't be modified.
-     *
-     * @var bool
-     */
-    protected $isThumbnail;
-
-    /**
      * Calculated item data stored into the ItemData object instance.
      *
      * @var ItemData
@@ -90,10 +82,9 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      * @param string $path
      * @param bool $isThumbnail
      */
-    public function __construct($path, $isThumbnail = false)
+    public function __construct($path, protected $isThumbnail = false)
     {
         $this->setStorage(BaseStorage::STORAGE_S3_NAME);
-        $this->isThumbnail = $isThumbnail;
         $this->resetStats($path);
     }
 
@@ -157,11 +148,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      */
     protected function setAbsolutePath()
     {
-        if ($this->isThumbnail) {
-            $pathRoot = $this->storage->forThumbnail()->getRoot();
-        } else {
-            $pathRoot = $this->storage->getRoot();
-        }
+        $pathRoot = $this->isThumbnail ? $this->storage->forThumbnail()->getRoot() : $this->storage->getRoot();
 
         $this->pathAbsolute = rtrim($pathRoot, '/') . $this->pathRelative;
     }
@@ -176,11 +163,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      */
     public function setIsDirectory()
     {
-        if ($this->isExists) {
-            $this->isDir = is_dir($this->pathAbsolute);
-        } else {
-            $this->isDir = substr($this->pathRelative, -1, 1) === '/';
-        }
+        $this->isDir = $this->isExists ? is_dir($this->pathAbsolute) : str_ends_with($this->pathRelative, '/');
     }
 
     /**
@@ -347,8 +330,8 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
             return $path;
         }
 
-        $thumbRoot = '/' . trim($this->storage->config('images.thumbnail.dir'), '/');
-        if (strpos($path, $thumbRoot) === 0) {
+        $thumbRoot = '/' . trim((string) $this->storage->config('images.thumbnail.dir'), '/');
+        if (str_starts_with($path, $thumbRoot)) {
             // remove thumbnails root folder
             $path = substr($path, strlen($thumbRoot));
         }
@@ -451,7 +434,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      *
      * @return bool
      */
-    public function isAllowedExtension()
+    public function isAllowedExtension(): bool
     {
         // check the extension (for files):
         $extension = pathinfo($this->pathRelative, PATHINFO_EXTENSION);
@@ -467,7 +450,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
                 // Not in the allowed list, so it's restricted.
                 return false;
             }
-        } else if ($this->storage->config('security.extensions.policy') === 'DISALLOW_LIST') {
+        } elseif ($this->storage->config('security.extensions.policy') === 'DISALLOW_LIST') {
             if (in_array($extension, $extensionRestrictions)) {
                 // It's in the disallowed list, so it's restricted.
                 return false;
@@ -486,7 +469,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      *
      * @return bool
      */
-    public function isAllowedPattern()
+    public function isAllowedPattern(): bool
     {
         // check the relative path against the glob patterns:
         $pathRelative = $this->getOriginalPath();
@@ -511,7 +494,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
                 // relative path did not match the allowed pattern list, so it's restricted:
                 return false;
             }
-        } else if ($this->storage->config('security.patterns.policy') === 'DISALLOW_LIST') {
+        } elseif ($this->storage->config('security.patterns.policy') === 'DISALLOW_LIST') {
             if ($matchFound) {
                 // relative path matched the disallowed pattern list, so it's restricted:
                 return false;
@@ -553,17 +536,12 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
         }
 
         // Check system permission (O.S./filesystem/NAS)
-        if ($this->storage->hasSystemReadPermission($this->pathAbsolute) === false) {
+        if (!$this->storage->hasSystemReadPermission($this->pathAbsolute)) {
             return false;
         }
-
         // Check the user's Auth API callback:
-        if (function_exists('fm_has_read_permission') && fm_has_read_permission($this->pathAbsolute) === false) {
-            return false;
-        }
-
         // Nothing is restricting access to this item, so it is readable
-        return true;
+        return !(function_exists('fm_has_read_permission') && fm_has_read_permission($this->pathAbsolute) === false);
     }
 
     /**
@@ -583,17 +561,12 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
         }
 
         // Check system permission (O.S./filesystem/NAS)
-        if ($this->storage->hasSystemWritePermission($this->pathAbsolute) === false) {
+        if (!$this->storage->hasSystemWritePermission($this->pathAbsolute)) {
             return false;
         }
-
         // Check the user's Auth API callback:
-        if (function_exists('fm_has_write_permission') && fm_has_write_permission($this->pathAbsolute) === false) {
-            return false;
-        }
-
         // Nothing is restricting access to this item, so it is writable
-        return true;
+        return !(function_exists('fm_has_write_permission') && fm_has_write_permission($this->pathAbsolute) === false);
     }
 
     /**
@@ -604,13 +577,13 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
     public function isValidPath()
     {
         $valid = true;
-        if(strpos($this->pathAbsolute, $this->storage->getRoot()) !== 0) {
+        if(!str_starts_with($this->pathAbsolute, $this->storage->getRoot())) {
             $valid = false;
         }
 
         $needleList = ['..', './'];
         foreach($needleList as $needle) {
-            if (strpos($this->pathAbsolute, $needle) !== false) {
+            if (str_contains($this->pathAbsolute, $needle)) {
                 $valid = false;
                 break;
             }
@@ -647,13 +620,11 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
      */
     public function checkRestrictions()
     {
-        if (!$this->isDir) {
-            if ($this->isAllowedExtension() === false) {
-                app()->error('FORBIDDEN_NAME', [$this->pathRelative]);
-            }
+        if (!$this->isDir && !$this->isAllowedExtension()) {
+            app()->error('FORBIDDEN_NAME', [$this->pathRelative]);
         }
 
-        if ($this->isAllowedPattern() === false) {
+        if (!$this->isAllowedPattern()) {
             app()->error('INVALID_FILE_TYPE');
         }
 
@@ -669,7 +640,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
     public function checkReadPermission()
     {
         // Check system permission (O.S./filesystem/NAS)
-        if ($this->storage->hasSystemReadPermission($this->pathAbsolute) === false) {
+        if (!$this->storage->hasSystemReadPermission($this->pathAbsolute)) {
             app()->error('NOT_ALLOWED_SYSTEM');
         }
 
@@ -695,7 +666,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
         }
 
         // Check system permission (O.S./filesystem/NAS)
-        if ($this->storage->hasSystemWritePermission($this->pathAbsolute) === false) {
+        if (!$this->storage->hasSystemWritePermission($this->pathAbsolute)) {
             app()->error('NOT_ALLOWED_SYSTEM');
         }
 
@@ -742,12 +713,12 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
 
                         $normalizeFunc = function($value) {
                             if ($value !== 'ACP') {
-                                $value = ucfirst(strtolower($value));
+                                $value = ucfirst(strtolower((string) $value));
                             }
                             return $value;
                         };
                         // Output examples: FULL_ACCESS => GrantFullAccess; READ_ACP => GrantReadACP; etc.
-                        $permission = 'Grant' . implode('', array_map($normalizeFunc, explode('_', $grant['Permission'])));
+                        $permission = 'Grant' . implode('', array_map($normalizeFunc, explode('_', (string) $grant['Permission'])));
                         $aclParams[$permission] = implode(',', $properties);
                     }
                 }

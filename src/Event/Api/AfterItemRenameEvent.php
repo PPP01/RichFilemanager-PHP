@@ -10,28 +10,13 @@ use RFM\Repository\ItemData;
  */
 class AfterItemRenameEvent extends Event
 {
-    const NAME = 'api.after.item.rename';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
-
-    /**
-     * @var ItemData
-     */
-    protected $originalItemData;
+    final public const NAME = 'api.after.item.rename';
 
     /**
      * AfterItemRenameEvent constructor.
-     *
-     * @param ItemData $itemData
-     * @param ItemData $originalItemData
      */
-    public function __construct(ItemData $itemData, ItemData $originalItemData)
+    public function __construct(protected \RFM\Repository\ItemData $itemData, protected \RFM\Repository\ItemData $originalItemData)
     {
-        $this->itemData = $itemData;
-        $this->originalItemData = $originalItemData;
     }
 
     /**

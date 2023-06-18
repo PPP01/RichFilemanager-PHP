@@ -10,21 +10,13 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFileUploadEvent extends Event
 {
-    const NAME = 'api.after.file.upload';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
+    final public const NAME = 'api.after.file.upload';
 
     /**
      * AfterFileUploadEvent constructor.
-     *
-     * @param ItemData $itemData
      */
-    public function __construct(ItemData $itemData)
+    public function __construct(protected \RFM\Repository\ItemData $itemData)
     {
-        $this->itemData = $itemData;
     }
 
     /**

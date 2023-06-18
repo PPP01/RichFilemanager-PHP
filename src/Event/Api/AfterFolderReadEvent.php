@@ -10,28 +10,13 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFolderReadEvent extends Event
 {
-    const NAME = 'api.after.folder.read';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
-
-    /**
-     * @var array
-     */
-    protected $filesList;
+    final public const NAME = 'api.after.folder.read';
 
     /**
      * AfterFolderReadEvent constructor.
-     *
-     * @param ItemData $itemData
-     * @param array $filesList
      */
-    public function __construct(ItemData $itemData, array $filesList)
+    public function __construct(protected \RFM\Repository\ItemData $itemData, protected array $filesList)
     {
-        $this->itemData = $itemData;
-        $this->filesList = $filesList;
     }
 
     /**
