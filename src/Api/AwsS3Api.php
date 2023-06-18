@@ -16,7 +16,7 @@ class AwsS3Api implements ApiInterface
     /**
      * @var \RFM\Repository\S3\Storage
      */
-    protected $storage;
+    protected \RFM\Repository\StorageInterface $storage;
 
     /**
      * Api constructor.
@@ -87,7 +87,7 @@ class AwsS3Api implements ApiInterface
             app()->error('UNABLE_TO_OPEN_DIRECTORY', [$model->getRelativePath()]);
         } else {
             while (false !== ($file = readdir($handle))) {
-                array_push($filesList, $file);
+                $filesList[] = $file;
             }
             closedir($handle);
 
@@ -194,14 +194,14 @@ class AwsS3Api implements ApiInterface
         $responseData = [];
         $paramName = $this->storage->config('upload.paramName');
         $content = $this->storage->initUploader($model)->post(false);
-        $files = isset($content[$paramName]) ? $content[$paramName] : null;
+        $files = $content[$paramName] ?? null;
 
         // there is only one file in the array as long as "singleFileUploads" is set to "true"
         if ($files && is_array($files) && is_object($files[0])) {
             $file = $files[0];
             if (isset($file->error)) {
                 $error = is_array($file->error) ? $file->error : [$file->error];
-                app()->error($error[0], isset($error[1]) ? $error[1] : []);
+                app()->error($error[0], $error[1] ?? []);
             } else {
                 $uploadedPath = $this->storage->cleanPath('/' . $model->getRelativePath() . '/' . $file->name);
                 $modelUploaded = new ItemModel($uploadedPath);
@@ -231,7 +231,7 @@ class AwsS3Api implements ApiInterface
         $modelTarget->checkPath();
         $modelTarget->checkWritePermission();
 
-        $dirName = $this->storage->normalizeString(trim($targetName, '/')) . '/';
+        $dirName = $this->storage->normalizeString(trim((string) $targetName, '/')) . '/';
         $relativePath = $this->storage->cleanPath('/' . $targetPath . '/' . $dirName);
 
         $model = new ItemModel($relativePath);
@@ -267,7 +267,7 @@ class AwsS3Api implements ApiInterface
         $filename = Input::get('new');
 
         // forbid to change path during rename
-        if (strrpos($filename, '/') !== false) {
+        if (strrpos((string) $filename, '/') !== false) {
             app()->error('FORBIDDEN_CHAR_SLASH');
         }
 
@@ -309,17 +309,14 @@ class AwsS3Api implements ApiInterface
         // rename file or folder
         if ($this->storage->renameRecursive($modelOld, $modelNew)) {
             Log::info('renamed "' . $modelOld->getAbsolutePath() . '" to "' . $modelNew->getAbsolutePath() . '"');
-
             // rename thumbnail file or thumbnails folder if exists
             if ($modelThumbOld->isExists()) {
                 $this->storage->forThumbnail()->renameRecursive($modelThumbOld, $modelThumbNew);
             }
+        } elseif ($modelOld->isDirectory()) {
+            app()->error('ERROR_RENAMING_DIRECTORY', [$modelOld->getRelativePath(), $modelNew->getRelativePath()]);
         } else {
-            if ($modelOld->isDirectory()) {
-                app()->error('ERROR_RENAMING_DIRECTORY', [$modelOld->getRelativePath(), $modelNew->getRelativePath()]);
-            } else {
-                app()->error('ERROR_RENAMING_FILE', [$modelOld->getRelativePath(), $modelNew->getRelativePath()]);
-            }
+            app()->error('ERROR_RENAMING_FILE', [$modelOld->getRelativePath(), $modelNew->getRelativePath()]);
         }
 
         // update items stats
@@ -389,17 +386,14 @@ class AwsS3Api implements ApiInterface
         // copy file or folder
         if ($this->storage->copyRecursive($modelSource, $modelNew)) {
             Log::info('copied "' . $modelSource->getAbsolutePath() . '" to "' . $modelNew->getAbsolutePath() . '"');
-
             // copy thumbnail file or thumbnails folder
             if ($modelThumbOld->isExists()) {
                 $this->storage->forThumbnail()->copyRecursive($modelThumbOld, $modelThumbNew);
             }
+        } elseif ($modelSource->isDirectory()) {
+            app()->error('ERROR_COPYING_DIRECTORY', [$basename, $modelTarget->getRelativePath()]);
         } else {
-            if ($modelSource->isDirectory()) {
-                app()->error('ERROR_COPYING_DIRECTORY', [$basename, $modelTarget->getRelativePath()]);
-            } else {
-                app()->error('ERROR_COPYING_FILE', [$basename, $modelTarget->getRelativePath()]);
-            }
+            app()->error('ERROR_COPYING_FILE', [$basename, $modelTarget->getRelativePath()]);
         }
 
         // update items stats
@@ -468,7 +462,6 @@ class AwsS3Api implements ApiInterface
         // move file or folder
         if ($this->storage->renameRecursive($modelSource, $modelNew)) {
             Log::info('moved "' . $modelSource->getAbsolutePath() . '" to "' . $modelNew->getAbsolutePath() . '"');
-
             // move thumbnail file or thumbnails folder if exists
             if ($modelThumbOld->isExists()) {
                 // do if target paths exists, otherwise remove old thumbnail(s)
@@ -478,12 +471,10 @@ class AwsS3Api implements ApiInterface
                     $modelThumbOld->remove();
                 }
             }
+        } elseif ($modelSource->isDirectory()) {
+            app()->error('ERROR_MOVING_DIRECTORY', [$basename, $modelTarget->getRelativePath()]);
         } else {
-            if ($modelSource->isDirectory()) {
-                app()->error('ERROR_MOVING_DIRECTORY', [$basename, $modelTarget->getRelativePath()]);
-            } else {
-                app()->error('ERROR_MOVING_FILE', [$basename, $modelTarget->getRelativePath()]);
-            }
+            app()->error('ERROR_MOVING_FILE', [$basename, $modelTarget->getRelativePath()]);
         }
 
         // update items stats
@@ -561,7 +552,7 @@ class AwsS3Api implements ApiInterface
         }
 
         // if $thumbnail is set to true we return the thumbnail
-        if ($thumbnail === true && $this->storage->config('images.thumbnail.enabled')) {
+        if ($thumbnail && $this->storage->config('images.thumbnail.enabled')) {
             // create thumbnail model
             $model = $modelImage->thumbnail();
 
@@ -608,17 +599,14 @@ class AwsS3Api implements ApiInterface
 
         if ($model->remove()) {
             Log::info('deleted "' . $model->getAbsolutePath() . '"');
-
             // delete thumbnail(s) if exist(s)
             if ($modelThumb->isExists()) {
                 $modelThumb->remove();
             }
+        } elseif ($model->isDirectory()) {
+            app()->error('ERROR_DELETING_DIRECTORY', [$model->getRelativePath()]);
         } else {
-            if ($model->isDirectory()) {
-                app()->error('ERROR_DELETING_DIRECTORY', [$model->getRelativePath()]);
-            } else {
-                app()->error('ERROR_DELETING_FILE', [$model->getRelativePath()]);
-            }
+            app()->error('ERROR_DELETING_FILE', [$model->getRelativePath()]);
         }
 
         // update items stats
@@ -681,7 +669,7 @@ class AwsS3Api implements ApiInterface
 
         try {
             $this->storage->getDirSummary($path, $attributes);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             app()->error('ERROR_SERVER');
         }
 
@@ -761,7 +749,7 @@ class AwsS3Api implements ApiInterface
 
                 if ($copied) {
                     $fileNames[] = $model->getAbsolutePath();
-                    if (strpos($filename, '/') === false) {
+                    if (!str_contains($filename, '/')) {
                         $rootLevelItems[] = $model;
                     }
                 }

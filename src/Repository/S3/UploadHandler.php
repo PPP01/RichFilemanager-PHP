@@ -50,21 +50,10 @@ class UploadHandler extends BaseUploadHandler
         //$this->options['image_library'] = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 0 : 1;
 
         // original image settings
-        $this->options['image_versions'] = array(
-            '' => array(
-                'auto_orient' => $this->storage->config('images.main.autoOrient'),
-                'max_width' => $this->storage->config('images.main.maxWidth'),
-                'max_height' => $this->storage->config('images.main.maxHeight'),
-            ),
-        );
+        $this->options['image_versions'] = ['' => ['auto_orient' => $this->storage->config('images.main.autoOrient'), 'max_width' => $this->storage->config('images.main.maxWidth'), 'max_height' => $this->storage->config('images.main.maxHeight')]];
         // image thumbnail settings
         if($this->storage->config('images.thumbnail.enabled') === true) {
-            $this->options['image_versions']['thumbnail'] = array(
-                'upload_dir' => $this->model->thumbnail()->getAbsolutePath(),
-                'crop' => $this->storage->config('images.thumbnail.crop'),
-                'max_width' => $this->storage->config('images.thumbnail.maxWidth'),
-                'max_height' => $this->storage->config('images.thumbnail.maxHeight'),
-            );
+            $this->options['image_versions']['thumbnail'] = ['upload_dir' => $this->model->thumbnail()->getAbsolutePath(), 'crop' => $this->storage->config('images.thumbnail.crop'), 'max_width' => $this->storage->config('images.thumbnail.maxWidth'), 'max_height' => $this->storage->config('images.thumbnail.maxHeight')];
         }
 
         $this->error_messages['accept_file_types'] = 'INVALID_FILE_TYPE';
@@ -92,7 +81,7 @@ class UploadHandler extends BaseUploadHandler
 
     protected function trim_file_name($file_path, $name, $size, $type, $error, $index, $content_range)
     {
-        return $this->storage->normalizeString($name, array('.', '-'));
+        return $this->storage->normalizeString($name, ['.', '-']);
     }
 
     protected function get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range)
@@ -103,7 +92,7 @@ class UploadHandler extends BaseUploadHandler
         return parent::get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range);
     }
 
-    protected function validate($uploaded_file, $file, $error, $index)
+    protected function validate($uploaded_file, $file, $error, $index): bool
     {
         if ($error) {
             $file->error = $this->get_error_message($error);
@@ -126,11 +115,7 @@ class UploadHandler extends BaseUploadHandler
             $file->error = ['FORBIDDEN_NAME', [$model->getRelativePath()]];
             return false;
         }
-        if ($uploaded_file && is_uploaded_file($uploaded_file)) {
-            $file_size = $this->get_file_size($uploaded_file);
-        } else {
-            $file_size = $content_length;
-        }
+        $file_size = $uploaded_file && is_uploaded_file($uploaded_file) ? $this->get_file_size($uploaded_file) : $content_length;
         if ($this->storage->config('options.fileRootSizeLimit') > 0 &&
             ($file_size + $this->storage->getRootTotalSize()) > $this->storage->config('options.fileRootSizeLimit')) {
             $file->error = $this->get_error_message('max_storage_size');
@@ -160,7 +145,7 @@ class UploadHandler extends BaseUploadHandler
         $min_width = @$this->options['min_width'];
         $min_height = @$this->options['min_height'];
         if (($max_width || $max_height || $min_width || $min_height) && $this->is_valid_image_name($file->name)) {
-            list($img_width, $img_height) = $this->get_image_size($uploaded_file);
+            [$img_width, $img_height] = $this->get_image_size($uploaded_file);
 
             // If we are auto rotating the image by default, do the checks on
             // the correct orientation
@@ -229,7 +214,7 @@ class UploadHandler extends BaseUploadHandler
         $file = new \stdClass();
         $file->name = $this->get_file_name($uploaded_file, $name, $size, $type, $error,
             $index, $content_range);
-        $file->size = strval($size);
+        $file->size = (string) $size;
         $file->type = $type;
         $file->path = $this->get_upload_path($file->name);
 
@@ -242,13 +227,7 @@ class UploadHandler extends BaseUploadHandler
             $append_file = $content_range && is_file($file->path) &&
                 $file->size > $this->get_file_size($file->path);
 
-            if ($uploaded_file && is_uploaded_file($uploaded_file)) {
-                // multipart/formdata uploads (POST method uploads)
-                $filename = $uploaded_file;
-            } else {
-                // non-multipart uploads (PUT method support)
-                $filename = $this->options['input_stream'];
-            }
+            $filename = $uploaded_file && is_uploaded_file($uploaded_file) ? $uploaded_file : $this->options['input_stream'];
 
             file_put_contents(
                 $file->path,
@@ -297,11 +276,11 @@ class UploadHandler extends BaseUploadHandler
      */
     public function get_file_size($file_path, $clear_stat_cache = false)
     {
-        if(substr($file_path, 0, 5) === 's3://') {
+        if(str_starts_with($file_path, 's3://')) {
             // for s3 object path
             // you could use this approach only with AWS SDK version >= 3.18.0
             // @see https://github.com/aws/aws-sdk-php/issues/963 for details
-            return strval($this->storage->getFileSize($file_path));
+            return (string) $this->storage->getFileSize($file_path);
         } else {
             // for local path (thumbnails e.g.)
             return parent::get_file_size($file_path, $clear_stat_cache);

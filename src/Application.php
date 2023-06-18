@@ -15,11 +15,11 @@ use function RFM\container;
 use function RFM\dispatcher;
 
 // path to "application" folder
-defined('FM_APP_PATH') or define('FM_APP_PATH', dirname(__FILE__));
+defined('FM_APP_PATH') || define('FM_APP_PATH', __DIR__);
 // path to PHP connector root folder
-defined('FM_ROOT_PATH') or define('FM_ROOT_PATH', dirname(dirname(__FILE__)));
+defined('FM_ROOT_PATH') || define('FM_ROOT_PATH', dirname(__FILE__, 2));
 // path to PHP connector root folder
-defined('DS') or define('DS', DIRECTORY_SEPARATOR);
+defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
 class Application
 {
@@ -91,15 +91,13 @@ class Application
      * @param string $string
      * @return string
      */
-    public function prefixed($string)
+    public function prefixed($string): string
     {
         return static::$prefix . '.' . $string;
     }
 
     /**
      * Add storage to the collection.
-     *
-     * @param StorageInterface $storage
      */
     public function setStorage(StorageInterface $storage)
     {
@@ -141,7 +139,7 @@ class Application
 
         $path = $this->getConfigurationPath($name);
 
-        if ($path) {
+        if ($path !== '' && $path !== '0') {
             $config = $this->mergeConfigs(require $path, $options);
             config([$name => $config]);
 
@@ -161,7 +159,7 @@ class Application
      * @param string $name
      * @return string
      */
-    public function getConfigurationPath($name)
+    public function getConfigurationPath($name): string
     {
         return $this->basePath() . DS . 'config' . DS . "config.{$name}.php";
     }
@@ -196,9 +194,7 @@ class Application
      */
     public function registerRequestBindings()
     {
-        container()->singleton('request', function () {
-            return Request::createFromGlobals();
-        });
+        container()->singleton('request', fn() => Request::createFromGlobals());
     }
 
     /**
@@ -206,9 +202,7 @@ class Application
      */
     public function registerLoggerBindings()
     {
-        container()->singleton('logger', function () {
-            return new Logger();
-        });
+        container()->singleton('logger', fn() => new Logger());
     }
 
     /**
@@ -216,9 +210,7 @@ class Application
      */
     public function registerConfigBindings()
     {
-        container()->singleton('config', function () {
-            return new Repository();
-        });
+        container()->singleton('config', fn() => new Repository());
     }
 
     /**
@@ -226,9 +218,7 @@ class Application
      */
     public function registerDispatcherBindings()
     {
-        container()->singleton('dispatcher', function () {
-            return new EventDispatcher();
-        });
+        container()->singleton('dispatcher', fn() => new EventDispatcher());
     }
 
     /**
@@ -255,7 +245,7 @@ class Application
      */
     public function run()
     {
-        if (count(static::$storageRegistry) === 0) {
+        if (static::$storageRegistry === []) {
             throw new \Exception("No storage has been set.");
         }
 
@@ -387,7 +377,7 @@ class Application
      * @param array $arguments
      * @param array $meta
      */
-    public function error($label, $arguments = [], $meta = [])
+    public function error($label, $arguments = [], $meta = []): never
     {
         $meta['arguments'] = $arguments;
         $message = 'Error code: ' . $label . ', meta: ' . json_encode($meta);
@@ -426,7 +416,7 @@ class Application
     {
         $args = func_get_args();
         $res = array_shift($args);
-        while (!empty($args)) {
+        while ($args !== []) {
             $next = array_shift($args);
             foreach ($next as $k => $v) {
                 if (is_int($k)) {
@@ -438,11 +428,7 @@ class Application
                 } elseif (is_array($v) && isset($res[$k]) && is_array($res[$k])) {
                     // check if array keys is sequential to consider its as indexed array
                     // http://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential
-                    if (array_keys($res[$k]) === range(0, count($res[$k]) - 1)) {
-                        $res[$k] = $v;
-                    } else {
-                        $res[$k] = self::mergeConfigs($res[$k], $v);
-                    }
+                    $res[$k] = array_keys($res[$k]) === range(0, count($res[$k]) - 1) ? $v : self::mergeConfigs($res[$k], $v);
                 } else {
                     $res[$k] = $v;
                 }
@@ -466,7 +452,7 @@ class Application
      *
      * @return string
      */
-    public function version()
+    public function version(): string
     {
         return 'RichFilemanager PHP connector v1.2.6';
     }

@@ -21,7 +21,7 @@ class Factory
         if ($storage->config('images.thumbnail.useLocalStorage') === true) {
             return new LocalItemModel($path, true);
         } else {
-            $itemClass = get_class($imageModel);
+            $itemClass = $imageModel::class;
             return new $itemClass($path, true);
         }
     }

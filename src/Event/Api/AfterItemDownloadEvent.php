@@ -10,21 +10,13 @@ use RFM\Repository\ItemData;
  */
 class AfterItemDownloadEvent extends Event
 {
-    const NAME = 'api.after.item.download';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
+    final public const NAME = 'api.after.item.download';
 
     /**
      * AfterItemDownloadEvent constructor.
-     *
-     * @param ItemData $itemData
      */
-    public function __construct(ItemData $itemData)
+    public function __construct(protected \RFM\Repository\ItemData $itemData)
     {
-        $this->itemData = $itemData;
     }
 
     /**

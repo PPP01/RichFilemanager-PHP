@@ -10,28 +10,13 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFileExtractEvent extends Event
 {
-    const NAME = 'api.after.file.extract';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
-
-    /**
-     * @var array
-     */
-    protected $filesList;
+    final public const NAME = 'api.after.file.extract';
 
     /**
      * AfterFileExtractEvent constructor.
-     *
-     * @param ItemData $itemData
-     * @param array $filesList
      */
-    public function __construct(ItemData $itemData, array $filesList)
+    public function __construct(protected \RFM\Repository\ItemData $itemData, protected array $filesList)
     {
-        $this->itemData = $itemData;
-        $this->filesList = $filesList;
     }
 
     /**

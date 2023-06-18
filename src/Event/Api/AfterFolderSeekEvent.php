@@ -10,35 +10,15 @@ use RFM\Repository\ItemData;
  */
 class AfterFolderSeekEvent extends Event
 {
-    const NAME = 'api.after.folder.seek';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
-
-    /**
-     * @var string
-     */
-    protected $searchString;
-
-    /**
-     * @var array
-     */
-    protected $filesList;
+    final public const NAME = 'api.after.folder.seek';
 
     /**
      * AfterFolderSeekEvent constructor.
      *
-     * @param ItemData $itemData
      * @param string $searchString
-     * @param array $filesList
      */
-    public function __construct(ItemData $itemData, $searchString, array $filesList)
+    public function __construct(protected \RFM\Repository\ItemData $itemData, protected $searchString, protected array $filesList)
     {
-        $this->itemData = $itemData;
-        $this->searchString = $searchString;
-        $this->filesList = $filesList;
     }
 
     /**

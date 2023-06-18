@@ -10,7 +10,7 @@
  *  @copyright	Authors
  */
 
-$config = require 'config.local.php';
+$config = require __DIR__ . '/config.local.php';
 
 /**
  * Default value "false".

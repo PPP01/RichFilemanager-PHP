@@ -17,10 +17,10 @@ use function RFM\config;
 
 abstract class BaseStorage
 {
-    const STORAGE_S3_NAME = 's3';
-    const STORAGE_LOCAL_NAME = 'local';
-    const SEARCH_MODE_START_WITH = 'START_WITH';
-    const SEARCH_MODE_WILDCARD = 'WILDCARD';
+    public const STORAGE_S3_NAME = 's3';
+    public const STORAGE_LOCAL_NAME = 'local';
+    public const SEARCH_MODE_START_WITH = 'START_WITH';
+    public const SEARCH_MODE_WILDCARD = 'WILDCARD';
 
     /**
      * Storage name string.
@@ -109,7 +109,7 @@ abstract class BaseStorage
     public function normalizeString($string, $allowed = [])
     {
         $allow = '';
-        if (!empty($allowed)) {
+        if ($allowed !== []) {
             foreach ($allowed as $value) {
                 $allow .= "\\$value";
             }
@@ -128,7 +128,7 @@ abstract class BaseStorage
 
         if ($this->config('options.charsLatinOnly') === true) {
             // transliterate if extension is loaded
-            if (extension_loaded('intl') === true && function_exists('transliterator_transliterate')) {
+            if (extension_loaded('intl') && function_exists('transliterator_transliterate')) {
                 $options = 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
                 $string = transliterator_transliterate($options, $string);
             }
@@ -167,14 +167,11 @@ abstract class BaseStorage
      */
     public function compareFilename($filename, $string)
     {
-        switch ($this->config('options.searchMode')) {
-            case self::SEARCH_MODE_START_WITH:
-                return starts_with(mb_strtolower($filename), mb_strtolower($string));
-            case self::SEARCH_MODE_WILDCARD:
-                return fnmatch(mb_strtolower($string), mb_strtolower($filename));
-            default:
-                return false;
-        }
+        return match ($this->config('options.searchMode')) {
+            self::SEARCH_MODE_START_WITH => starts_with(mb_strtolower($filename), mb_strtolower($string)),
+            self::SEARCH_MODE_WILDCARD => fnmatch(mb_strtolower($string), mb_strtolower($filename)),
+            default => false,
+        };
     }
 
     /**

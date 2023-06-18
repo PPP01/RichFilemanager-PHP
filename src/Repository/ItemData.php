@@ -6,8 +6,8 @@ use function RFM\app;
 
 class ItemData
 {
-    const TYPE_FILE = 'file';
-    const TYPE_FOLDER = 'folder';
+    final public const TYPE_FILE = 'file';
+    final public const TYPE_FOLDER = 'folder';
 
     public $pathRelative;
     public $pathAbsolute;
@@ -56,8 +56,8 @@ class ItemData
                 'created'   => $this->timeCreated,
                 'modified'  => $this->timeModified,
                 'size'      => $this->size,
-                'width'     => isset($this->imageData['width']) ? $this->imageData['width'] : 0,
-                'height'    => isset($this->imageData['height']) ? $this->imageData['height'] : 0,
+                'width'     => $this->imageData['width'] ?? 0,
+                'height'    => $this->imageData['height'] ?? 0,
             ]
         ];
     }

@@ -10,21 +10,13 @@ use RFM\Repository\ItemData;
  */
 class AfterItemDeleteEvent extends Event
 {
-    const NAME = 'api.after.item.delete';
-
-    /**
-     * @var ItemData
-     */
-    protected $originalItemData;
+    final public const NAME = 'api.after.item.delete';
 
     /**
      * AfterItemDeleteEvent constructor.
-     *
-     * @param ItemData $originalItemData
      */
-    public function __construct(ItemData $originalItemData)
+    public function __construct(protected \RFM\Repository\ItemData $originalItemData)
     {
-        $this->originalItemData = $originalItemData;
     }
 
     /**

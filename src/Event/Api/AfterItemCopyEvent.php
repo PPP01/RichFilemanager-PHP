@@ -10,28 +10,13 @@ use RFM\Repository\ItemData;
  */
 class AfterItemCopyEvent extends Event
 {
-    const NAME = 'api.after.item.copy';
-
-    /**
-     * @var ItemData
-     */
-    protected $itemData;
-
-    /**
-     * @var ItemData
-     */
-    protected $originalItemData;
+    final public const NAME = 'api.after.item.copy';
 
     /**
      * AfterItemCopyEvent constructor.
-     *
-     * @param ItemData $itemData
-     * @param ItemData $originalItemData
      */
-    public function __construct(ItemData $itemData, ItemData $originalItemData)
+    public function __construct(protected \RFM\Repository\ItemData $itemData, protected \RFM\Repository\ItemData $originalItemData)
     {
-        $this->itemData = $itemData;
-        $this->originalItemData = $originalItemData;
     }
 
     /**

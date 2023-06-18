@@ -4,7 +4,7 @@ namespace RFM;
 
 class Logger {
     /**
-     * @var string|null
+     * @var string
      */
     public $file;
     /**
@@ -41,16 +41,15 @@ class Logger {
      * @param string $message
      * @return string
      */
-    protected function formatMessage($message)
+    protected function formatMessage($message): string
     {
-        $traces = array();
+        $traces = [];
         foreach ($this->getBacktrace() as $trace) {
             $traces[] = "in {$trace['file']}:{$trace['line']}";
         }
 
         $str = "[" . date('Y-m-d H:i:s', time()) . "]#" .  $this->getUserIp() . "# - " . $message;
-        $str .= (empty($traces) ? '' : "\n    " . implode("\n    ", $traces));
-        return $str;
+        return $str . ($traces === [] ? '' : "\n    " . implode("\n    ", $traces));
     }
 
     /**
@@ -59,13 +58,13 @@ class Logger {
      */
     protected function getBacktrace()
     {
-        $traces = array();
+        $traces = [];
         if ($this->traceLevel > 0) {
             $count = 0;
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             array_pop($backtrace); // remove the last trace since it would be the entry script, not very useful
             foreach ($backtrace as $trace) {
-                if (isset($trace['file'], $trace['line']) && strpos($trace['file'], FM_APP_PATH) !== 0) {
+                if (isset($trace['file'], $trace['line']) && !str_starts_with($trace['file'], FM_APP_PATH)) {
                     unset($trace['object'], $trace['args']);
                     $traces[] = $trace;
                     if (++$count >= $this->traceLevel) {
@@ -83,8 +82,8 @@ class Logger {
      */
     protected function getUserIp()
     {
-        $client  = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : null;
-        $forward = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : null;
+        $client  = $_SERVER['HTTP_CLIENT_IP'] ?? null;
+        $forward = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null;
         $remote  = $_SERVER['REMOTE_ADDR'];
 
         if ($client && filter_var($client, FILTER_VALIDATE_IP)) {

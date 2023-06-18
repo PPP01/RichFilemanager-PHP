@@ -15,7 +15,7 @@ class Input
      * @param  mixed   $default
      * @return mixed
      */
-    public static function get($key = null, $default = null)
+    public static function get($key = null, mixed $default = null)
     {
         return request()->get($key, $default);
     }

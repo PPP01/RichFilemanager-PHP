@@ -17,15 +17,15 @@ use Psr\Http\Message\StreamInterface;
  */
 class StorageHelper
 {
-    const ACL_PRIVATE = 'private';
-    const ACL_PUBLIC_READ = 'public-read';
-    const ACL_PUBLIC_READ_WRITE = 'public-read-write';
-    const ACL_AUTHENTICATED_READ = 'authenticated-read';
-    const ACL_BUCKET_OWNER_READ = 'bucket-owner-read';
-    const ACL_BUCKET_OWNER_FULL_CONTROL = 'bucket-owner-full-control';
+    final public const ACL_PRIVATE = 'private';
+    final public const ACL_PUBLIC_READ = 'public-read';
+    final public const ACL_PUBLIC_READ_WRITE = 'public-read-write';
+    final public const ACL_AUTHENTICATED_READ = 'authenticated-read';
+    final public const ACL_BUCKET_OWNER_READ = 'bucket-owner-read';
+    final public const ACL_BUCKET_OWNER_FULL_CONTROL = 'bucket-owner-full-control';
 
-    const ACL_POLICY_DEFAULT = 'default';
-    const ACL_POLICY_INHERIT = 'inherit';
+    final public const ACL_POLICY_DEFAULT = 'default';
+    final public const ACL_POLICY_INHERIT = 'inherit';
 
     /**
      * @var \Aws\Credentials\CredentialsInterface|array|callable
@@ -91,15 +91,15 @@ class StorageHelper
             throw new \Exception('S3 credentials isn\'t set.');
         }
 
-        if (empty($this->region)) {
+        if ($this->region === '') {
             throw new \Exception('Region isn\'t set.');
         }
 
-        if (empty($this->bucket)) {
+        if ($this->bucket === '') {
             throw new \Exception('You must set bucket name.');
         }
 
-        if (!empty($this->cdnHostname)) {
+        if ($this->cdnHostname !== '') {
             $this->cdnHostname = rtrim($this->cdnHostname, '/');
         }
 
@@ -117,7 +117,7 @@ class StorageHelper
         // https://docs.aws.amazon.com/aws-sdk-php/v3/guide/service/s3-stream-wrapper.html
         $this->client->registerStreamWrapper();
         
-        if(!empty($this->encryption)){
+        if($this->encryption !== null && $this->encryption !== ''){
             // set default params for S3 StreamWrapper
             stream_context_set_default([
                 's3' => [
@@ -196,7 +196,7 @@ class StorageHelper
     /**
      * @inheritDoc
      */
-    public function getPresignedUrl($key, $expires)
+    public function getPresignedUrl($key, $expires): string
     {
         $command = $this->getClient()->getCommand('GetObject', [
             'Bucket' => $this->bucket,
@@ -210,7 +210,7 @@ class StorageHelper
     /**
      * @inheritDoc
      */
-    public function getCdnUrl($key)
+    public function getCdnUrl($key): string
     {
         return $this->cdnHostname . '/' . $this->trimKey($key);
     }
@@ -238,7 +238,7 @@ class StorageHelper
             $this->bucket,
             $this->trimKey($key),
             $this->toStream($source),
-            !empty($acl) ? $acl : $this->defaultAcl,
+            empty($acl) ? $this->defaultAcl : $acl,
             $options
         );
     }
@@ -263,14 +263,13 @@ class StorageHelper
             $this->bucket,
             $this->trimKey($key),
             $this->toStream($source),
-            !empty($acl) ? $acl : $this->defaultAcl,
+            empty($acl) ? $this->defaultAcl : $acl,
             $args
         );
     }
 
     /**
      * @param string $name
-     * @param array  $args
      * @return \Aws\ResultInterface
      */
     protected function execute($name, array $args)
@@ -281,7 +280,6 @@ class StorageHelper
     }
 
     /**
-     * @param array $a
      * @return array
      */
     protected function prepareArgs(array $a)
@@ -352,7 +350,7 @@ class StorageHelper
             $this->trimKey($key),
             $this->bucket,
             $destination,
-            !empty($acl) ? $acl : $this->defaultAcl,
+            empty($acl) ? $this->defaultAcl : $acl,
             $options
         );
     }
@@ -382,7 +380,7 @@ class StorageHelper
      * @param string $key
      * @return string
      */
-    public function trimKey($key)
+    public function trimKey($key): string
     {
         return ltrim($key, '/');
     }
@@ -396,7 +394,7 @@ class StorageHelper
     protected function applyAclPolicy($options)
     {
         // specifying both ACL and Grant... options is not allowed
-        foreach ($options as $name => $value) {
+        foreach (array_keys($options) as $name) {
             if (starts_with($name, 'Grant')) {
                 return $options;
             }

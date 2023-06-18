@@ -39,7 +39,7 @@ function app()
  * @param  mixed  $default
  * @return mixed
  */
-function config($key = null, $default = null)
+function config($key = null, mixed $default = null)
 {
     if (is_null($key)) {
         return container('config');
@@ -53,7 +53,7 @@ function config($key = null, $default = null)
         return container('config')->set($keys);
     }
 
-    return container('config')->get(app()->prefixed($key), $default);
+    return container('config')->get(app()->prefixed($key));
 }
 
 /**
@@ -101,7 +101,7 @@ function mime_type_by_extension($file)
      * array. It does not guarantee that the file is TRULY that
      * of the extension that this function returns.
      */
-    $mime_type = array(
+    $mime_type = [
         "3dml"			=>	"text/vnd.in3d.3dml",
         "3g2"			=>	"video/3gpp2",
         "3gp"			=>	"video/3gpp",
@@ -395,7 +395,8 @@ function mime_type_by_extension($file)
         "mc1"			=>	"application/vnd.medcalcdata",
         "mcd"			=>	"application/vnd.mcd",
         "mcurl"			=>	"text/vnd.curl.mcurl",
-        "md"			=>	"text/x-markdown", // http://bit.ly/1Kc5nUB
+        "md"			=>	"text/x-markdown",
+        // http://bit.ly/1Kc5nUB
         "mdb"			=>	"application/x-msaccess",
         "mdi"			=>	"image/vnd.ms-modi",
         "meta4"			=>	"application/metalink4+xml",
@@ -789,10 +790,10 @@ function mime_type_by_extension($file)
         "zaz"			=>	"application/vnd.zzazz.deck+xml",
         "zip"			=>	"application/zip",
         "zir"			=>	"application/vnd.zul",
-        "zmm"			=>	"application/vnd.handheld-entertainment+xml"
-    );
+        "zmm"			=>	"application/vnd.handheld-entertainment+xml",
+    ];
 
-    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $extension = strtolower(pathinfo((string) $file, PATHINFO_EXTENSION));
     if (isset($mime_type[$extension])) {
         return $mime_type[$extension];
     } else {

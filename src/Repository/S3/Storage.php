@@ -98,7 +98,7 @@ class Storage extends BaseStorage implements StorageInterface
         $this->setDynamicRoot($path);
         $this->storageRoot = $this->getS3WrapperPath($this->getDynamicRoot());
 
-        if($makeDir === true && !is_dir($this->storageRoot)) {
+        if($makeDir && !is_dir($this->storageRoot)) {
             Log::info('creating "' . $this->storageRoot . '" root folder');
             $this->s3->put($this->getDynamicRoot());
         }
@@ -144,7 +144,7 @@ class Storage extends BaseStorage implements StorageInterface
      * @param string $path
      * @return mixed
      */
-    public function getS3WrapperPath($path)
+    public function getS3WrapperPath($path): string
     {
         $path = $this->cleanPath($this->s3->bucket . '/' . $path);
 
@@ -163,7 +163,7 @@ class Storage extends BaseStorage implements StorageInterface
         $position = strrpos($fullPath, $subPath);
         if($position === 0) {
             $path = substr($fullPath, strlen($subPath));
-            return $path ? $this->cleanPath('/' . $path) : '';
+            return $path !== '' && $path !== '0' ? $this->cleanPath('/' . $path) : '';
         }
         return '';
     }
@@ -190,7 +190,7 @@ class Storage extends BaseStorage implements StorageInterface
      * @param string $path - absolute path
      * @return bool
      */
-    public function hasSystemReadPermission($path)
+    public function hasSystemReadPermission($path): bool
     {
         return is_readable($path);
     }
@@ -201,7 +201,7 @@ class Storage extends BaseStorage implements StorageInterface
      * @param string $path - absolute path
      * @return bool
      */
-    public function hasSystemWritePermission($path)
+    public function hasSystemWritePermission($path): bool
     {
         return is_writable($path);
     }
@@ -281,7 +281,7 @@ class Storage extends BaseStorage implements StorageInterface
      * @param $options array
      * @return bool
      */
-    public function createFolder($target, $prototype = null, $options = [])
+    public function createFolder($target, $prototype = null, $options = []): bool
     {
         $options = [];
         if ($this->aclPolicy === StorageHelper::ACL_POLICY_INHERIT) {
@@ -312,7 +312,7 @@ class Storage extends BaseStorage implements StorageInterface
 
         $copied = copy($source->getAbsolutePath(), $target->getAbsolutePath(), $context);
 
-        if ($copied && $remove === true) {
+        if ($copied && $remove) {
             $this->s3->delete($source->getDynamicPath());
         }
 
@@ -337,7 +337,7 @@ class Storage extends BaseStorage implements StorageInterface
 
             foreach ($files as $path) {
                 $pattern = preg_quote($source->getAbsolutePath());
-                $relativePath = preg_replace("#^{$pattern}#", '', $path);
+                $relativePath = preg_replace("#^{$pattern}#", '', (string) $path);
                 $itemSource = new ItemModel($source->getRelativePath() . $relativePath);
                 $itemTarget = new ItemModel($target->getRelativePath() . $relativePath);
 
@@ -372,7 +372,7 @@ class Storage extends BaseStorage implements StorageInterface
 
             foreach ($files as $path) {
                 $pattern = preg_quote($source->getAbsolutePath());
-                $relativePath = preg_replace("#^{$pattern}#", '', $path);
+                $relativePath = preg_replace("#^{$pattern}#", '', (string) $path);
                 $itemSource = new ItemModel($source->getRelativePath() . $relativePath);
                 $itemTarget = new ItemModel($target->getRelativePath() . $relativePath);
 
@@ -422,16 +422,16 @@ class Storage extends BaseStorage implements StorageInterface
 
         // handle HTTP RANGE for stream files (audio/video)
         if(isset($_SERVER['HTTP_RANGE'])) {
-            if(!preg_match('/bytes=(\d+)-(\d+)?/', $_SERVER['HTTP_RANGE'], $matches)) {
+            if(!preg_match('/bytes=(\d+)-(\d+)?/', (string) $_SERVER['HTTP_RANGE'], $matches)) {
                 header('HTTP/1.1 416 Requested Range Not Satisfiable');
                 header('Content-Range: bytes */' . $fileSize);
                 exit;
             }
 
-            $offset = intval($matches[1]);
+            $offset = (int) $matches[1];
 
             if(isset($matches[2])) {
-                $end = intval($matches[2]);
+                $end = (int) $matches[2];
                 if($offset > $end) {
                     header('HTTP/1.1 416 Requested Range Not Satisfiable');
                     header('Content-Range: bytes */' . $fileSize);
