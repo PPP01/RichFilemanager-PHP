@@ -192,9 +192,9 @@ class UploadHandler extends BaseUploadHandler
      * @param string $upload_path
      * @return ItemModel
      */
-    protected function mkdir($upload_path)
+    protected function mkdir($upload_dir)
     {
-        $model = new ItemModel($this->storage->getRelativePath($upload_path));
+        $model = new ItemModel($this->storage->getRelativePath($upload_dir));
         if ($model->isDirectory() && !$model->isExists()) {
             $this->storage->createFolder($model, $this->model);
         }

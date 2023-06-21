@@ -234,7 +234,7 @@ class BaseUploadHandler
                .$version_path.$file_name;
     }
 
-    protected function mkdir($upload_dir): bool
+    protected function mkdir($upload_dir)
     {
         return mkdir($upload_dir, $this->options['mkdir_mode'], true);
     }
