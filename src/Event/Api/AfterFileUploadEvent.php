@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFileUploadEvent extends Event
 {
-    final public const NAME = 'api.after.file.upload';
+    final public const string NAME = 'api.after.file.upload';
 
     /**
      * AfterFileUploadEvent constructor.
@@ -22,7 +22,7 @@ class AfterFileUploadEvent extends Event
     /**
      * @return ItemData
      */
-    public function getUploadedFileData()
+    public function getUploadedFileData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }

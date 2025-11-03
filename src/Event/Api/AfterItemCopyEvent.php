@@ -10,7 +10,7 @@ use RFM\Repository\ItemData;
  */
 class AfterItemCopyEvent extends Event
 {
-    final public const NAME = 'api.after.item.copy';
+    final public const string NAME = 'api.after.item.copy';
 
     /**
      * AfterItemCopyEvent constructor.
@@ -22,7 +22,7 @@ class AfterItemCopyEvent extends Event
     /**
      * @return ItemData
      */
-    public function getItemData()
+    public function getItemData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }
@@ -30,7 +30,7 @@ class AfterItemCopyEvent extends Event
     /**
      * @return ItemData
      */
-    public function getOriginalItemData()
+    public function getOriginalItemData(): \RFM\Repository\ItemData
     {
         return $this->originalItemData;
     }

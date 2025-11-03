@@ -10,7 +10,7 @@ use RFM\Repository\ItemData;
  */
 class AfterItemDownloadEvent extends Event
 {
-    final public const NAME = 'api.after.item.download';
+    final public const string NAME = 'api.after.item.download';
 
     /**
      * AfterItemDownloadEvent constructor.
@@ -22,7 +22,7 @@ class AfterItemDownloadEvent extends Event
     /**
      * @return ItemData
      */
-    public function getDownloadedItemData()
+    public function getDownloadedItemData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }

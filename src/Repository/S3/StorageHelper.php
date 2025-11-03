@@ -17,15 +17,15 @@ use Psr\Http\Message\StreamInterface;
  */
 class StorageHelper
 {
-    final public const ACL_PRIVATE = 'private';
-    final public const ACL_PUBLIC_READ = 'public-read';
-    final public const ACL_PUBLIC_READ_WRITE = 'public-read-write';
-    final public const ACL_AUTHENTICATED_READ = 'authenticated-read';
-    final public const ACL_BUCKET_OWNER_READ = 'bucket-owner-read';
-    final public const ACL_BUCKET_OWNER_FULL_CONTROL = 'bucket-owner-full-control';
+    final public const string ACL_PRIVATE = 'private';
+    final public const string ACL_PUBLIC_READ = 'public-read';
+    final public const string ACL_PUBLIC_READ_WRITE = 'public-read-write';
+    final public const string ACL_AUTHENTICATED_READ = 'authenticated-read';
+    final public const string ACL_BUCKET_OWNER_READ = 'bucket-owner-read';
+    final public const string ACL_BUCKET_OWNER_FULL_CONTROL = 'bucket-owner-full-control';
 
-    final public const ACL_POLICY_DEFAULT = 'default';
-    final public const ACL_POLICY_INHERIT = 'inherit';
+    final public const string ACL_POLICY_DEFAULT = 'default';
+    final public const string ACL_POLICY_INHERIT = 'inherit';
 
     /**
      * @var \Aws\Credentials\CredentialsInterface|array|callable

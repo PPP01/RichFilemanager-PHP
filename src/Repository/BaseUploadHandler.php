@@ -29,7 +29,7 @@ class BaseUploadHandler
 
     // PHP File Upload error message codes:
     // http://php.net/manual/en/features.file-upload.errors.php
-    protected $error_messages = array(
+    protected $error_messages = [
         1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
         2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
         3 => 'The uploaded file was only partially uploaded',
@@ -49,7 +49,7 @@ class BaseUploadHandler
         'abort' => 'File upload aborted',
         'image_resize' => 'Failed to resize image',
         'type_mismatch' => 'File content does not match file extension',
-    );
+    ];
 
     protected $image_objects = [];
 
@@ -654,17 +654,12 @@ class BaseUploadHandler
 
     protected function gd_write_func($type, $src_img, $new_file_path, $image_quality = null)
     {
-        switch ($type) {
-            case 'jpg':
-            case 'jpeg':
-                return imagejpeg($src_img, $new_file_path, $image_quality);
-            case 'gif':
-                return imagegif($src_img, $new_file_path);
-            case 'png':
-                return imagepng($src_img, $new_file_path, $image_quality);
-        }
-
-        return false;
+        return match ($type) {
+            'jpg', 'jpeg' => imagejpeg($src_img, $new_file_path, $image_quality),
+            'gif' => imagegif($src_img, $new_file_path),
+            'png' => imagepng($src_img, $new_file_path, $image_quality),
+            default => false,
+        };
     }
 
     protected function gd_create_scaled_image($file, $version, $options) {
@@ -678,8 +673,7 @@ class BaseUploadHandler
             case 'jpg':
             case 'jpeg':
                 $src_func = 'imagecreatefromjpeg';
-                $image_quality = isset($options['jpeg_quality']) ?
-                    $options['jpeg_quality'] : 75;
+                $image_quality = $options['jpeg_quality'] ?? 75;
                 break;
             case 'gif':
                 $src_func = 'imagecreatefromgif';
@@ -687,8 +681,7 @@ class BaseUploadHandler
                 break;
             case 'png':
                 $src_func = 'imagecreatefrompng';
-                $image_quality = isset($options['png_quality']) ?
-                    $options['png_quality'] : 9;
+                $image_quality = $options['png_quality'] ?? 9;
                 break;
             default:
                 return false;
@@ -1051,7 +1044,7 @@ class BaseUploadHandler
         }
         if ($failed_versions !== []) {
             $file->error = $this->get_error_message('image_resize')
-                .' ('.implode($failed_versions,', ').')';
+                .' ('.implode(', ', $failed_versions).')';
         }
         // Free memory:
         $this->destroy_image_object($file->path);
@@ -1339,7 +1332,7 @@ class BaseUploadHandler
         // Parse the Content-Disposition header, if available:
         $content_disposition_header = $this->get_server_var('HTTP_CONTENT_DISPOSITION');
         $file_name = $content_disposition_header ?
-            rawurldecode(preg_replace(
+            rawurldecode((string) preg_replace(
                 '/(^[^"]+")|("$)/',
                 '',
                 (string) $content_disposition_header

@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFolderReadEvent extends Event
 {
-    final public const NAME = 'api.after.folder.read';
+    final public const string NAME = 'api.after.folder.read';
 
     /**
      * AfterFolderReadEvent constructor.
@@ -22,7 +22,7 @@ class AfterFolderReadEvent extends Event
     /**
      * @return ItemData
      */
-    public function getFolderData()
+    public function getFolderData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }
@@ -32,7 +32,7 @@ class AfterFolderReadEvent extends Event
      *
      * @return array
      */
-    public function getFolderContent()
+    public function getFolderContent(): array
     {
         return $this->filesList;
     }

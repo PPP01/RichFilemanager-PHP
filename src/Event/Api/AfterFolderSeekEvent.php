@@ -10,7 +10,7 @@ use RFM\Repository\ItemData;
  */
 class AfterFolderSeekEvent extends Event
 {
-    final public const NAME = 'api.after.folder.seek';
+    final public const string NAME = 'api.after.folder.seek';
 
     /**
      * AfterFolderSeekEvent constructor.
@@ -24,7 +24,7 @@ class AfterFolderSeekEvent extends Event
     /**
      * @return ItemData
      */
-    public function getFolderData()
+    public function getFolderData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }
@@ -42,7 +42,7 @@ class AfterFolderSeekEvent extends Event
      *
      * @return array
      */
-    public function getSearchResult()
+    public function getSearchResult(): array
     {
         return $this->filesList;
     }

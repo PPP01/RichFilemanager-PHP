@@ -79,11 +79,13 @@ class UploadHandler extends BaseUploadHandler
         }
     }
 
+    #[\Override]
     protected function trim_file_name($file_path, $name, $size, $type, $error, $index, $content_range)
     {
         return $this->storage->normalizeString($name, ['.', '-']);
     }
 
+    #[\Override]
     protected function get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range)
     {
         if ($this->storage->config('upload.overwrite')) {
@@ -92,6 +94,7 @@ class UploadHandler extends BaseUploadHandler
         return parent::get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range);
     }
 
+    #[\Override]
     protected function validate($uploaded_file, $file, $error, $index): bool
     {
         if ($error) {
@@ -192,6 +195,7 @@ class UploadHandler extends BaseUploadHandler
      * @param string $upload_path
      * @return ItemModel
      */
+    #[\Override]
     protected function mkdir($upload_dir)
     {
         $model = new ItemModel($this->storage->getRelativePath($upload_dir));

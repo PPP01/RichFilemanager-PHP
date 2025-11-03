@@ -24,7 +24,7 @@ class Storage extends BaseStorage implements StorageInterface
      *
      * @var mixed
      */
-	protected $storageRoot;
+	protected string $storageRoot;
 
     /**
      * Directory inside bucket for storing files.

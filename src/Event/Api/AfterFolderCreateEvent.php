@@ -10,7 +10,7 @@ use RFM\Repository\ItemData;
  */
 class AfterFolderCreateEvent extends Event
 {
-    final public const NAME = 'api.after.folder.create';
+    final public const string NAME = 'api.after.folder.create';
 
     /**
      * AfterFolderCreateEvent constructor.
@@ -22,7 +22,7 @@ class AfterFolderCreateEvent extends Event
     /**
      * @return ItemData
      */
-    public function getFolderData()
+    public function getFolderData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }

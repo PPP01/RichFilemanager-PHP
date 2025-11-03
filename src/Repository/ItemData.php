@@ -6,8 +6,8 @@ use function RFM\app;
 
 class ItemData
 {
-    final public const TYPE_FILE = 'file';
-    final public const TYPE_FOLDER = 'folder';
+    final public const string TYPE_FILE = 'file';
+    final public const string TYPE_FOLDER = 'folder';
 
     public $pathRelative;
     public $pathAbsolute;

@@ -110,7 +110,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterFolderReadEvent($model->getData(), $filesPaths);
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterFolderReadEvent::NAME);
 
         return $responseData;
     }
@@ -156,7 +156,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterFolderSeekEvent($model->getData(), $searchString, $filesPaths);
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterFolderSeekEvent::NAME);
 
         return $responseData;
     }
@@ -214,7 +214,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterFileUploadEvent($itemData);
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterFileUploadEvent::NAME);
 
         return $responseData;
     }
@@ -252,7 +252,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterFolderCreateEvent($model->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterFolderCreateEvent::NAME);
 
         return $model->getData()->formatJsonApi();
     }
@@ -325,7 +325,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterItemRenameEvent($modelNew->getData(), $modelOld->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterItemRenameEvent::NAME);
 
         return $modelNew->getData()->formatJsonApi();
     }
@@ -401,7 +401,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterItemCopyEvent($modelNew->getData(), $modelSource->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterItemCopyEvent::NAME);
 
         return $modelNew->getData()->formatJsonApi();
     }
@@ -483,7 +483,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterItemMoveEvent($modelNew->getData(), $modelSource->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterItemMoveEvent::NAME);
 
         return $modelNew->getData()->formatJsonApi();
     }
@@ -614,7 +614,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterItemDeleteEvent($model->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterItemDeleteEvent::NAME);
 
         return $model->getData()->formatJsonApi();
     }
@@ -649,7 +649,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterItemDownloadEvent($model->getData());
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterItemDownloadEvent::NAME);
 
         Log::info('downloaded "' . $targetPath . '"');
         exit;
@@ -766,7 +766,7 @@ class AwsS3Api implements ApiInterface
 
         // create event and dispatch it
         $event = new ApiEvent\AfterFileExtractEvent($modelSource->getData(), $fileNames);
-        dispatcher()->dispatch($event, $event::NAME);
+        dispatcher()->dispatch($event, \RFM\Event\Api\AfterFileExtractEvent::NAME);
 
         return $responseData;
     }

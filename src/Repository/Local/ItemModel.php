@@ -287,7 +287,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
     public function thumbnail()
     {
         if (is_null($this->thumbnail)) {
-            $this->thumbnail = (new Factory())->createThumbnailModel($this);
+            $this->thumbnail = new Factory()->createThumbnailModel($this);
         }
 
         return $this->thumbnail;
@@ -444,7 +444,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
 
         if ($this->storage->config('security.extensions.ignoreCase')) {
             $extension = strtolower($extension);
-            $extensionRestrictions = array_map('strtolower', $extensionRestrictions);
+            $extensionRestrictions = array_map(strtolower(...), $extensionRestrictions);
         }
 
         if ($this->storage->config('security.extensions.policy') === 'ALLOW_LIST') {
@@ -479,7 +479,7 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
 
         if ($this->storage->config('security.patterns.ignoreCase')) {
             $pathRelative = strtolower($pathRelative);
-            $patternRestrictions = array_map('strtolower', $patternRestrictions);
+            $patternRestrictions = array_map(strtolower(...), $patternRestrictions);
         }
 
         // (check for a match before applying the restriction logic)

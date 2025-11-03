@@ -10,7 +10,7 @@ use RFM\Repository\ItemData;
  */
 class AfterItemRenameEvent extends Event
 {
-    final public const NAME = 'api.after.item.rename';
+    final public const string NAME = 'api.after.item.rename';
 
     /**
      * AfterItemRenameEvent constructor.
@@ -22,7 +22,7 @@ class AfterItemRenameEvent extends Event
     /**
      * @return ItemData
      */
-    public function getItemData()
+    public function getItemData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }
@@ -30,7 +30,7 @@ class AfterItemRenameEvent extends Event
     /**
      * @return ItemData
      */
-    public function getOriginalItemData()
+    public function getOriginalItemData(): \RFM\Repository\ItemData
     {
         return $this->originalItemData;
     }

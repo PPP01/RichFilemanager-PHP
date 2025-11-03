@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class AfterFileExtractEvent extends Event
 {
-    final public const NAME = 'api.after.file.extract';
+    final public const string NAME = 'api.after.file.extract';
 
     /**
      * AfterFileExtractEvent constructor.
@@ -22,7 +22,7 @@ class AfterFileExtractEvent extends Event
     /**
      * @return ItemData
      */
-    public function getArchiveData()
+    public function getArchiveData(): \RFM\Repository\ItemData
     {
         return $this->itemData;
     }
@@ -32,7 +32,7 @@ class AfterFileExtractEvent extends Event
      *
      * @return array
      */
-    public function getArchiveContent()
+    public function getArchiveContent(): array
     {
         return $this->filesList;
     }

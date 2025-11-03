@@ -79,11 +79,13 @@ class UploadHandler extends BaseUploadHandler
         }
     }
 
+    #[\Override]
     protected function trim_file_name($file_path, $name, $size, $type, $error, $index, $content_range)
     {
         return $this->storage->normalizeString($name, ['.', '-']);
     }
 
+    #[\Override]
     protected function get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range)
     {
         if ($this->storage->config('upload.overwrite')) {
@@ -92,6 +94,7 @@ class UploadHandler extends BaseUploadHandler
         return parent::get_unique_filename($file_path, $name, $size, $type, $error, $index, $content_range);
     }
 
+    #[\Override]
     protected function validate($uploaded_file, $file, $error, $index): bool
     {
         if ($error) {
@@ -187,6 +190,7 @@ class UploadHandler extends BaseUploadHandler
      * @param string $upload_path
      * @return ItemModel
      */
+    #[\Override]
     protected function mkdir($upload_path)
     {
         $isThumbnail = ($upload_path === $this->model->thumbnail()->getAbsolutePath());
@@ -209,6 +213,7 @@ class UploadHandler extends BaseUploadHandler
     /**
      * Overridden to add stream context while uploading files with actual ContentType.
      */
+    #[\Override]
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,
                                           $index = null, $content_range = null) {
         $file = new \stdClass();
@@ -274,6 +279,7 @@ class UploadHandler extends BaseUploadHandler
      * @param bool $clear_stat_cache
      * @return int|string
      */
+    #[\Override]
     public function get_file_size($file_path, $clear_stat_cache = false)
     {
         if(str_starts_with($file_path, 's3://')) {
@@ -293,6 +299,7 @@ class UploadHandler extends BaseUploadHandler
      *
      * @inheritdoc
      */
+    #[\Override]
     protected function get_file_exif_data($file)
     {
         $exif = [];

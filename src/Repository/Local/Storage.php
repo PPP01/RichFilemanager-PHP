@@ -390,7 +390,7 @@ class Storage extends BaseStorage implements StorageInterface
 		}
 
 		while (false !== ($obj = readdir($handle))) {
-			if($obj == '.' || $obj == '..') {
+			if($obj === '.' || $obj === '..') {
 				continue;
 			}
 
@@ -537,7 +537,7 @@ class Storage extends BaseStorage implements StorageInterface
 		}
 
 		foreach($files as $file) {
-			if($file == "." || $file == "..") {
+			if($file === "." || $file === "..") {
 				continue;
 			}
             if (is_dir($modelDir->getAbsolutePath() . $file)) {
