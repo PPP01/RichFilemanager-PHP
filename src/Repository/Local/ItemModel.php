@@ -600,7 +600,13 @@ class ItemModel extends BaseItemModel implements ItemModelInterface
         $allowedPaths = array_map($this->storage->cleanPath(...), $allowedPaths);
         $realPathItem = $this->storage->cleanPath($realPathItem);
 
-        $match = starts_with($realPathItem, $allowedPaths);
+        $match = false;
+        foreach ($allowedPaths as $allowedPath) {
+            if (str_starts_with($realPathItem, $allowedPath)) {
+                $match = true;
+                break;
+            }
+        }
         if (!$match) {
             Log::info('Item path validation FAILED');
             Log::info('Absolute path "' . $this->pathAbsolute . '"');

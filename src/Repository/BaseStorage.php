@@ -168,7 +168,7 @@ abstract class BaseStorage
     public function compareFilename($filename, $string)
     {
         return match ($this->config('options.searchMode')) {
-            self::SEARCH_MODE_START_WITH => starts_with(mb_strtolower($filename), mb_strtolower($string)),
+            self::SEARCH_MODE_START_WITH => str_starts_with(mb_strtolower($filename), mb_strtolower($string)),
             self::SEARCH_MODE_WILDCARD => fnmatch(mb_strtolower($string), mb_strtolower($filename)),
             default => false,
         };
